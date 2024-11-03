@@ -22,14 +22,20 @@ function indicacaoController() {
         }
     }
 
-    async function criarIndicacao(req, res) {
+    async function criarIndicacao(req, res) { 
         const { nome, email } = req.body;
+        const {usuario_id, role } = req.user;
+
+        if (!usuario_id) {
+            return res.status(400).json({ error: 'ID de usuário não encontrado' });
+        }
+ 
         try {
-            const novaIndicacao = await indicacaoRepository.criarIndicacao({ nome, email });
-
-         
-    
-
+            const novaIndicacao = await indicacaoRepository.criarIndicacao({ 
+                nome, 
+                email, 
+                usuario_id 
+            });
             res.status(201).json(novaIndicacao);
         } catch (error) {
             console.error('Erro ao criar indicação ou enviar e-mail:', error);

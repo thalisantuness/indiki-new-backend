@@ -43,6 +43,11 @@ const Indicacao = sequelize.define('indicacoes', {
       },
     },
   },
+
+  usuario_id: {
+    type: Sequelize.INTEGER,
+    allowNull: false,
+  },
  
 }, 
 {

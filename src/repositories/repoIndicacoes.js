@@ -14,23 +14,24 @@ async function buscarIndicacaoPorId(id) {
 }
 
 async function criarIndicacao(dadosIndicacao) {
-    const { nome, email } = dadosIndicacao;
+    const { nome, email, usuario_id } = dadosIndicacao;
 
     if (!nome || !email) {
         throw new Error('Nome e email da indicação são obrigatórios');
     }
 
+
     try {
-        const novaIndicacao = await Indicacao.create({ nome, email });
-   
+        const novaIndicacao = await Indicacao.create({ nome, email, usuario_id: usuario_id });
+
+
         const mailOptions = {
-            from: process.env.EMAIL,
+            from: "cardial.i.t.gestao@gmail.com",
             to: email,
             subject: 'Convite para o App Indiki',
             text: `Olá, ${nome}! Você foi indicado a experimentar o nosso aplicativo. Participe, indique amigos e ganhe recompensas.`,
         };
 
-    
         await transporter.sendMail(mailOptions);
         console.log(`E-mail enviado para ${email}`);
 

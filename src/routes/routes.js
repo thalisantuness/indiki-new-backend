@@ -38,16 +38,16 @@ router.get('/solicitacoes', authMiddleware, solicitacoesController.listarSolicit
 router.post('/solicitacoes', authMiddleware, solicitacoesController.criarSolicitacao); 
 router.put('/solicitacoes/processar/:id', authMiddleware, solicitacoesController.processarSolicitacao);
 
-
+router.post('/indicacoes', authMiddleware,indicacaoController.criarIndicacao);
 // router.get('/solicitacoes/:id', solicitacoesController.buscarSolicitacaoPorId); 
 // router.put('/solicitacoes/status/:id', solicitacoesController.atualizarStatusSolicitacao); 
 // router.put('/solicitacoes/consolidar/:id', solicitacoesController.consolidarSolicitacao);
 
-router.get('/indicacoes', indicacaoController.listarIndicacoes);
-router.get('/indicacoes/:id', indicacaoController.buscarIndicacaoPorId);
-router.post('/indicacoes', indicacaoController.criarIndicacao);
-router.put('/indicacoes/:id', indicacaoController.atualizarIndicacao);
-router.delete('/indicacoes/:id', indicacaoController.excluirIndicacao);
+// router.get('/indicacoes', indicacaoController.listarIndicacoes);
+// router.get('/indicacoes/:id', indicacaoController.buscarIndicacaoPorId);
+
+// router.put('/indicacoes/:id', indicacaoController.atualizarIndicacao);
+// router.delete('/indicacoes/:id', indicacaoController.excluirIndicacao);
 
 router.use('*', (req, res) => {
   res.status(404).json({ errorMessage: 'Rota não encontrada' });

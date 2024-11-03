@@ -30,7 +30,7 @@ function solicitacoesController() {
       console.error('Erro ao buscar solicitação por ID:', error);
       res.status(500).json({ error: 'Não foi possível buscar a solicitação no momento.' });
     }
-  }
+  } 
 
   async function criarSolicitacao(req, res) {
     const { recom_id } = req.body; 
@@ -44,8 +44,6 @@ function solicitacoesController() {
     if (!usuario_id) {
       return res.status(400).json({ error: 'ID de usuário não encontrado' });
   }
-
-  console.log('Usuario ID:', usuario_id);
 
     try {
       const solicitacao = await repoSolicitacoes.criarSolicitacao({ 
