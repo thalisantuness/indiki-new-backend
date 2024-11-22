@@ -39,6 +39,8 @@ router.post('/solicitacoes', authMiddleware, solicitacoesController.criarSolicit
 router.put('/solicitacoes/processar/:id', authMiddleware, solicitacoesController.processarSolicitacao);
 
 router.post('/indicacoes', authMiddleware,indicacaoController.criarIndicacao);
+router.get('/indicacoes', indicacaoController.listarIndicacoes);
+
 // router.get('/solicitacoes/:id', solicitacoesController.buscarSolicitacaoPorId); 
 // router.put('/solicitacoes/status/:id', solicitacoesController.atualizarStatusSolicitacao); 
 // router.put('/solicitacoes/consolidar/:id', solicitacoesController.consolidarSolicitacao);

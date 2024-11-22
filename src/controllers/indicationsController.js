@@ -1,9 +1,22 @@
 const indicacaoRepository = require('../repositories/repoIndicacoes');
 
 function indicacaoController() {
+    
+    
     async function listarIndicacoes(req, res) {
+        const { usuario_id, role } = req.user;
+    
         try {
-            const indicacoes = await indicacaoRepository.listarIndicacoes();
+            let indicacoes;
+    
+            if (role === 'admin') {
+                
+                indicacoes = await indicacaoRepository.listarIndicacoes();
+            } else {
+                
+                indicacoes = await indicacaoRepository.listarIndicacoesPorUsuario(usuario_id);
+            }
+    
             res.status(200).json(indicacoes);
         } catch (error) {
             console.error('Erro ao listar indicações:', error);

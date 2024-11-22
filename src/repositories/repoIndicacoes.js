@@ -5,6 +5,11 @@ async function listarIndicacoes() {
     return Indicacao.findAll();
 }
 
+async function listarIndicacoesPorUsuario(usuario_id) {
+    return Indicacao.findAll({ where: { usuario_id } });
+}
+
+
 async function buscarIndicacaoPorId(id) {
     const indicacao = await Indicacao.findByPk(id);
     if (!indicacao) {
@@ -69,6 +74,7 @@ async function excluirIndicacao(id) {
 
 module.exports = {
     listarIndicacoes,
+    listarIndicacoesPorUsuario,
     buscarIndicacaoPorId,
     criarIndicacao,
     atualizarIndicacao,
