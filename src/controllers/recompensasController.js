@@ -40,7 +40,7 @@ function recompensasController() {
 
   async function cadastrarRecompensas(req, res) {
     const { nome, pontos, estoque } = req.body;
-    const usuario_id = req.usuario_id;
+    const usuario_id = req.user.usuario_id;
 
     if (!usuario_id) {
       return res.status(400).json({ error: 'ID de usuário não encontrado' });
