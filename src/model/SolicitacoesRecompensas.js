@@ -48,4 +48,14 @@ const SolicitacaoRecompensa = sequelize.define('SolicitacaoRecompensa', {
   timestamps: false,
 });
 
+SolicitacaoRecompensa.belongsTo(Usuario, {
+  foreignKey: 'usuario_id',
+  as: 'usuario', 
+});
+
+SolicitacaoRecompensa.belongsTo(Recompensas, {
+  foreignKey: 'recom_id',
+  as: 'recompensa', 
+});
+
 module.exports = { SolicitacaoRecompensa };

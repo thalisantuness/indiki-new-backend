@@ -3,9 +3,20 @@ const { Usuario } = require('../model/Usuarios');
 const { Recompensas } = require('../model/Recompensas');
 
 
-async function getRequests(){
-  return SolicitacaoRecompensa.findAll();
+async function getRequests() {
+  try {
+    return await SolicitacaoRecompensa.findAll({
+      include: [
+        { model: Usuario, as: 'usuario', attributes: ['nome'] },
+        { model: Recompensas, as: 'recompensa', attributes: ['nome'] }
+      ]
+    });
+  } catch (error) {
+    console.error('Erro ao buscar solicitações:', error);
+    throw new Error('Erro ao buscar solicitações');
+  }
 }
+
 
 async function listarSolicitacoesPorUsuario(usuario_id) {
   try {
