@@ -14,6 +14,9 @@ const solicitacoesController = SolicitacoesController();
 const IndicacaoController = require('../controllers/indicationsController');
 const indicacaoController = IndicacaoController();
 
+const AgendamentoController = require('../controllers/agendamentosController');
+const agendamentoController = AgendamentoController();
+
 const authMiddleware = require("../middleware/auth")
 
 
@@ -50,6 +53,11 @@ router.get('/indicacoes', indicacaoController.listarIndicacoes);
 
 // router.put('/indicacoes/:id', indicacaoController.atualizarIndicacao);
 // router.delete('/indicacoes/:id', indicacaoController.excluirIndicacao);
+
+router.post('/agendamentos', authMiddleware, agendamentoController.criar);
+router.get('/agendamentos', authMiddleware, agendamentoController.listar);
+router.put('/agendamentos/:id/status', authMiddleware, agendamentoController.atualizarStatus);
+router.get('/agendamentos/:id', authMiddleware, agendamentoController.buscarPorId);
 
 router.use('*', (req, res) => {
   res.status(404).json({ errorMessage: 'Rota não encontrada' });
