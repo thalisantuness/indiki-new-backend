@@ -11,54 +11,58 @@ const recompensasController = RecompensasController();
 const SolicitacoesController = require("../controllers/solicitacoesController");
 const solicitacoesController = SolicitacoesController();
 
-const IndicacaoController = require('../controllers/indicationsController');
-const indicacaoController = IndicacaoController();
+const ComprasController = require('../controllers/comprasController');
+const comprasController = ComprasController();
 
-const AgendamentoController = require('../controllers/agendamentosController');
-const agendamentoController = AgendamentoController();
+const RegrasController = require('../controllers/regrasController');
+const regrasController = RegrasController();
 
-const authMiddleware = require("../middleware/auth")
+const authMiddleware = require("../middleware/auth");
 
+// Rotas públicas
+router.post('/usuarios/login', usuariosController.logar);
+router.post('/usuarios', usuariosController.cadastrar);
 
-router.get('/usuarios', usuariosController.visualizarUsuario);
-router.post('/usuarios', usuariosController.cadastrar); 
-// router.delete('/usuarios/:email', usuariosController.excluir); 
-router.post('/usuarios/login', usuariosController.logar); 
-
-
+// Rotas autenticadas
 router.use(authMiddleware);
-router.put('/usuarios/admin', authMiddleware, usuariosController.tornarAdmin);
-router.put('/usuarios/pontos/:id', authMiddleware, usuariosController.givePoints);
 
-router.post('/recompensas', authMiddleware, recompensasController.cadastrarRecompensas);
-router.get('/recompensas', authMiddleware, recompensasController.visualizarRecompensas);
+// Usuários
+router.get('/usuarios', usuariosController.visualizarUsuario);
+router.put('/usuarios/admin', usuariosController.tornarAdmin);
+router.put('/usuarios/empresa', usuariosController.tornarEmpresa);
+router.put('/usuarios/empresa/:id/aprovar', usuariosController.aprovarEmpresa);
+router.get('/empresas', usuariosController.listarEmpresas);
+router.put('/minha-empresa', usuariosController.atualizarDadosEmpresa);
+router.put('/usuarios/pontos/:id', usuariosController.givePoints);
 
-// router.get('/recompensas/:recom_id', recompensasController.localizarRecompensas);
-// router.put('/recompensas/:recom_id', recompensasController.atualizarRecompensas);
-// router.delete('/recompensas/:recom_id', recompensasController.excluirRecom);
+// Recompensas
+router.post('/recompensas', recompensasController.cadastrarRecompensas);
+router.get('/recompensas', recompensasController.visualizarRecompensas);
 
-router.get('/solicitacoes', authMiddleware, solicitacoesController.listarSolicitacoes);
-router.post('/solicitacoes', authMiddleware, solicitacoesController.criarSolicitacao); 
-router.put('/solicitacoes/processar/:id', authMiddleware, solicitacoesController.processarSolicitacao);
+// Solicitações
+router.get('/solicitacoes', solicitacoesController.listarSolicitacoes);
+router.post('/solicitacoes', solicitacoesController.criarSolicitacao);
+router.put('/solicitacoes/processar/:id', solicitacoesController.processarSolicitacao);
 
-router.post('/indicacoes', authMiddleware,indicacaoController.criarIndicacao);
-router.get('/indicacoes', indicacaoController.listarIndicacoes);
+// Compras (substitui indicações)
+router.get('/compras', comprasController.listarCompras);
+router.get('/compras/:id', comprasController.buscarCompraPorId);
+router.post('/compras', comprasController.criarCompra);
+router.post('/compras/:compra_id/qrcode', comprasController.gerarQRCodeCompra);
+router.post('/compras/validar-qrcode', comprasController.validarQRCode);
+router.put('/compras/:id', comprasController.atualizarCompra);
+router.delete('/compras/:id', comprasController.excluirCompra);
+router.get('/minhas-estatisticas', comprasController.estatisticasEmpresa);
 
-// router.get('/solicitacoes/:id', solicitacoesController.buscarSolicitacaoPorId); 
-// router.put('/solicitacoes/status/:id', solicitacoesController.atualizarStatusSolicitacao); 
-// router.put('/solicitacoes/consolidar/:id', solicitacoesController.consolidarSolicitacao);
+// Regras
+router.post('/regras', regrasController.criarRegra);
+router.get('/minhas-regras', regrasController.listarRegrasEmpresa);
+router.get('/empresas/:empresa_id/regras', regrasController.listarRegrasPorEmpresaId);
+router.put('/regras/:regra_id/status', regrasController.ativarDesativarRegra);
+router.delete('/regras/:regra_id', regrasController.excluirRegra);
+router.post('/regras-padrao', regrasController.criarRegrasPadrao);
 
-// router.get('/indicacoes', indicacaoController.listarIndicacoes);
-// router.get('/indicacoes/:id', indicacaoController.buscarIndicacaoPorId);
-
-// router.put('/indicacoes/:id', indicacaoController.atualizarIndicacao);
-// router.delete('/indicacoes/:id', indicacaoController.excluirIndicacao);
-
-router.post('/agendamentos', authMiddleware, agendamentoController.criar);
-router.get('/agendamentos', authMiddleware, agendamentoController.listar);
-router.put('/agendamentos/:id/status', authMiddleware, agendamentoController.atualizarStatus);
-router.get('/agendamentos/:id', authMiddleware, agendamentoController.buscarPorId);
-
+// 404 handler
 router.use('*', (req, res) => {
   res.status(404).json({ errorMessage: 'Rota não encontrada' });
 });
