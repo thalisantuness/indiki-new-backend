@@ -1,6 +1,5 @@
 const Sequelize = require('sequelize');
 const sequelize = require('../utils/db');
-// const { Usuario } = require('./Usuarios');
 
 const Regra = sequelize.define('regras', {
   regra_id: {
@@ -58,9 +57,5 @@ const Regra = sequelize.define('regras', {
   ]
 });
 
-// Regra.belongsTo(Usuario, {
-//   foreignKey: 'empresa_id',
-//   as: 'empresa'
-// });
 
 module.exports = { Regra };
