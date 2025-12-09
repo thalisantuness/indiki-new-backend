@@ -6,21 +6,21 @@ const QRCode = sequelize.define('qrcodes', {
     type: Sequelize.STRING(100),
     primaryKey: true,
   },
-//   compra_id: {
-//     type: Sequelize.INTEGER,
-//     allowNull: false,
-//     references: { model: 'compras', key: 'compra_id' },
-//   },
-//   empresa_id: {
-//     type: Sequelize.INTEGER,
-//     allowNull: false,
-//     references: { model: 'empresas', key: 'empresa_id' },
-//   },
-//   cliente_id: {
-//     type: Sequelize.INTEGER,
-//     allowNull: false,
-//     references: { model: 'usuarios', key: 'usuario_id' },
-//   },
+  compra_id: {
+    type: Sequelize.INTEGER,
+    allowNull: false,
+    references: { model: 'compras', key: 'compra_id' },
+  },
+  empresa_id: {
+    type: Sequelize.INTEGER,
+    allowNull: false,
+    references: { model: 'empresas', key: 'empresa_id' },
+  },
+  cliente_id: {
+    type: Sequelize.INTEGER,
+    allowNull: false,
+    references: { model: 'usuarios', key: 'usuario_id' },
+  },
   qr_data: {
     type: Sequelize.TEXT,
     allowNull: false,

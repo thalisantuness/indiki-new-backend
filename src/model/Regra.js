@@ -11,7 +11,7 @@ const Regra = sequelize.define('regras', {
     type: Sequelize.INTEGER,
     allowNull: false,
     references: { model: 'usuarios', key: 'usuario_id' },
-    unique: true,  // ADICIONADO: Enforce uma única por empresa
+    unique: true,  
   },
   nome: {
     type: Sequelize.STRING,
@@ -52,7 +52,7 @@ const Regra = sequelize.define('regras', {
   schema: 'public',
   tableName: 'regras',
   timestamps: false,
-  indexes: [  // ADICIONADO: Unique index
+  indexes: [  
     { unique: true, fields: ['empresa_id'] }
   ]
 });

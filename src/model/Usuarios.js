@@ -47,13 +47,13 @@ const Usuario = sequelize.define('Usuario', {
     type: Sequelize.ENUM('ativo', 'pendente', 'bloqueado'),
     defaultValue: 'pendente',
   },
-//   regra_id: {  // FK para a única regra vinculada
-//     type: Sequelize.INTEGER,
-//     allowNull: true,
-//     references: { model: 'regras', key: 'regra_id' },
-//     onUpdate: 'CASCADE',
-//     onDelete: 'SET NULL',
-//   },
+  regra_id: {  
+    type: Sequelize.INTEGER,
+    allowNull: true,
+    references: { model: 'regras', key: 'regra_id' },
+    onUpdate: 'CASCADE',
+    onDelete: 'SET NULL',
+  },
   data_cadastro: {
     type: Sequelize.DATE,
     defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
@@ -66,15 +66,15 @@ const Usuario = sequelize.define('Usuario', {
   schema: 'public',
   tableName: 'usuarios',
   timestamps: false,
-//   indexes: [
-//     { fields: ['regra_id'] }
-//   ]
+  indexes: [
+    { fields: ['regra_id'] }
+  ]
 });
 
 
-// Usuario.belongsTo(Regra, {
-//   foreignKey: 'regra_id',
-//   as: 'regra'
-// });
+Usuario.belongsTo(Regra, {
+  foreignKey: 'regra_id',
+  as: 'regra'
+});
 
 module.exports = { Usuario };

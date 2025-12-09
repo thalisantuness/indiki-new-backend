@@ -1,6 +1,6 @@
 const Sequelize = require('sequelize');
 const sequelize = require('../utils/db');
-// const { Usuario } = require('./Usuarios');
+const { Usuario } = require('./Usuarios');
 
 const Compra = sequelize.define('compras', {
   compra_id: {
@@ -8,22 +8,22 @@ const Compra = sequelize.define('compras', {
     primaryKey: true,
     autoIncrement: true,
   },
-//   qr_code_id: {
-//     type: Sequelize.STRING(100),
-//     allowNull: false,
-//     unique: true,
-//   },
-//   cliente_id: { 
-//     type: Sequelize.INTEGER,
-//     allowNull: true,  
-//     defaultValue: null,  
-//     references: { model: 'usuarios', key: 'usuario_id' },
-//   },
-//   empresa_id: {
-//     type: Sequelize.INTEGER,
-//     allowNull: false,
-//     references: { model: 'usuarios', key: 'usuario_id' },
-//   },
+  qr_code_id: {
+    type: Sequelize.STRING(100),
+    allowNull: false,
+    unique: true,
+  },
+  cliente_id: { 
+    type: Sequelize.INTEGER,
+    allowNull: true,  
+    defaultValue: null,  
+    references: { model: 'usuarios', key: 'usuario_id' },
+  },
+  empresa_id: {
+    type: Sequelize.INTEGER,
+    allowNull: false,
+    references: { model: 'usuarios', key: 'usuario_id' },
+  },
   valor: {
     type: Sequelize.DECIMAL(10, 2),
     allowNull: false,
@@ -68,17 +68,17 @@ const Compra = sequelize.define('compras', {
   timestamps: false,
 });
 
-// Compra.belongsTo(Usuario, {
-//   foreignKey: 'cliente_id',
-//   as: 'cliente'
-// });
-// Compra.belongsTo(Usuario, {
-//   foreignKey: 'empresa_id',
-//   as: 'empresa'
-// });
-// Compra.belongsTo(Usuario, {
-//   foreignKey: 'validado_por',
-//   as: 'validador'
-// });
+Compra.belongsTo(Usuario, {
+  foreignKey: 'cliente_id',
+  as: 'cliente'
+});
+Compra.belongsTo(Usuario, {
+  foreignKey: 'empresa_id',
+  as: 'empresa'
+});
+Compra.belongsTo(Usuario, {
+  foreignKey: 'validado_por',
+  as: 'validador'
+});
 
 module.exports = { Compra };
