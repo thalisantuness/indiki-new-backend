@@ -3,10 +3,9 @@ const repoUsuarios = require('../repositories/repoUsuarios');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const authConfig = require('../config/auth.json');
+const { Op } = require('sequelize');
 
 function UsuarioController() {
-  // ==================== FUNÇÕES ORIGINAIS ====================
-
   async function visualizarUsuario(req, res) {
     try {
       const usuarios = await repoUsuarios.listarUsuarios();
@@ -22,7 +21,7 @@ function UsuarioController() {
 
   async function cadastrar(req, res) {
     const { nome, email, senha } = req.body;
-    try {    
+    try {
       await repoUsuarios.criarUsuario({ nome, email, senha });
       res.json({ message: `Usuário ${nome} cadastrado com sucesso` });
     } catch (error) {
@@ -33,7 +32,6 @@ function UsuarioController() {
 
   async function excluir(req, res) {
     const { email } = req.params;
-
     try {
       const numRegistrosExcluidos = await repoUsuarios.excluirUsuario(email);
       if (numRegistrosExcluidos === 0) {
@@ -51,15 +49,15 @@ function UsuarioController() {
     const { id } = req.body;
     try {
         const usuarioAtualizado = await repoUsuarios.tornarUsuarioAdmin(id);
-        res.json({ 
-          message: `Usuário com ID ${id} agora é administrador`, 
-          usuario: usuarioAtualizado 
+        res.json({
+          message: `Usuário com ID ${id} agora é administrador`,
+          usuario: usuarioAtualizado
         });
     } catch (error) {
         console.error('Erro ao atualizar usuário para admin:', error);
-        res.status(500).json({ 
-          errorMessage: 'Erro ao atualizar usuário para admin', 
-          error: error.message 
+        res.status(500).json({
+          errorMessage: 'Erro ao atualizar usuário para admin',
+          error: error.message
         });
     }
   }
@@ -67,81 +65,70 @@ function UsuarioController() {
   async function logar(req, res) {
     try {
       const { email, senha } = req.body;
-
       if (!email || !senha) {
         return res.status(400).json({ message: 'Email e senha são obrigatórios.' });
       }
-
       const user = await Usuario.findOne({ where: { email: email } });
-  
       if (!user) {
         return res.status(401).json({ message: 'Email não encontrado.' });
       }
-
       const isMatch = await bcrypt.compare(senha, user.senha);
-
       if (!isMatch) {
         return res.status(401).json({ message: 'Senha incorreta.' });
-      } 
-
-      const token = jwt.sign({ 
-        usuario_id: user.usuario_id, 
-        role: user.role, 
+      }
+      const token = jwt.sign({
+        usuario_id: user.usuario_id,
+        role: user.role,
       }, authConfig.secret, {
         expiresIn: 86400,
       });
-      
-      res.send({user, token});
     
+      res.send({user, token});
+  
     } catch (error) {
         console.error('Erro ao autenticar usuário:', error);
-        res.status(500).json({ 
-          errorMessage: 'Erro ao autenticar usuário', 
-          error: error.message 
+        res.status(500).json({
+          errorMessage: 'Erro ao autenticar usuário',
+          error: error.message
         });
     }
   }
 
   async function givePoints(req, res) {
-    const { id } = req.params; 
-    const { pontos } = req.body; 
-
+    const { id } = req.params;
+    const { pontos } = req.body;
     try {
         const usuarioAtualizado = await repoUsuarios.givePoints(id, pontos);
-        res.json({ 
-          message: `Pontos adicionados com sucesso ao usuário ${usuarioAtualizado.nome}`, 
-          usuario: usuarioAtualizado 
+        res.json({
+          message: `Pontos adicionados com sucesso ao usuário ${usuarioAtualizado.nome}`,
+          usuario: usuarioAtualizado
         });
     } catch (error) {
         console.error('Erro ao adicionar pontos:', error);
-        res.status(500).json({ 
-          errorMessage: 'Erro ao adicionar pontos', 
-          error: error.message 
+        res.status(500).json({
+          errorMessage: 'Erro ao adicionar pontos',
+          error: error.message
         });
     }
   }
 
-  // ==================== FUNÇÕES NOVAS (EMPRESA) ====================
-
   async function tornarEmpresa(req, res) {
     const { id } = req.body;
     const { usuario_id, role } = req.user;
-
     if (role !== 'admin') {
       return res.status(403).json({ error: 'Apenas administradores podem tornar usuários em empresas' });
     }
-
     try {
       const usuarioAtualizado = await repoUsuarios.tornarUsuarioEmpresa(id);
-      res.json({ 
-        message: `Usuário com ID ${id} agora é uma empresa`, 
-        usuario: usuarioAtualizado 
+      res.json({
+        message: `Usuário com ID ${id} agora é uma empresa`,
+        usuario: usuarioAtualizado
       });
     } catch (error) {
       console.error('Erro ao atualizar usuário para empresa:', error);
-      res.status(500).json({ 
-        errorMessage: 'Erro ao atualizar usuário para empresa', 
-        error: error.message 
+      res.status(500).json({
+        errorMessage: 'Erro ao atualizar usuário para empresa',
+        error: error.message
       });
     }
   }
@@ -149,35 +136,32 @@ function UsuarioController() {
   async function aprovarEmpresa(req, res) {
     const { id } = req.params;
     const { usuario_id, role } = req.user;
-
     if (role !== 'admin') {
       return res.status(403).json({ error: 'Apenas administradores podem aprovar empresas' });
     }
-
     try {
       const usuarioAtualizado = await repoUsuarios.aprovarEmpresa(id);
-      res.json({ 
-        message: `Empresa com ID ${id} aprovada com sucesso`, 
-        usuario: usuarioAtualizado 
+      res.json({
+        message: `Empresa com ID ${id} aprovada com sucesso`,
+        usuario: usuarioAtualizado
       });
     } catch (error) {
       console.error('Erro ao aprovar empresa:', error);
-      res.status(500).json({ 
-        errorMessage: 'Erro ao aprovar empresa', 
-        error: error.message 
+      res.status(500).json({
+        errorMessage: 'Erro ao aprovar empresa',
+        error: error.message
       });
     }
   }
 
   async function listarEmpresas(req, res) {
     const { usuario_id, role } = req.user;
-
-    if (role !== 'admin') {
-      return res.status(403).json({ error: 'Apenas administradores podem listar empresas' });
-    }
-
     try {
-      const empresas = await repoUsuarios.listarEmpresas();
+      let where = { role: 'empresa', status: 'ativo' };
+      if (role === 'empresa') {
+        where.usuario_id = { [Op.ne]: usuario_id };
+      }
+      const empresas = await repoUsuarios.listarEmpresas(where);
       res.json(empresas);
     } catch (error) {
       console.error('Erro ao listar empresas:', error);
@@ -186,40 +170,37 @@ function UsuarioController() {
   }
 
   async function atualizarDadosEmpresa(req, res) {
-    const { cnpj, endereco, telefone } = req.body;
+    const { cnpj, endereco, telefone, nome_regra, tipo, valor_minimo, pontos, multiplicador } = req.body;
     const { usuario_id, role } = req.user;
-
     if (role !== 'empresa') {
       return res.status(403).json({ error: 'Apenas empresas podem atualizar dados comerciais' });
     }
-
     try {
-      const usuarioAtualizado = await repoUsuarios.atualizarDadosEmpresa(usuario_id, { cnpj, endereco, telefone });
-      res.json({ 
-        message: 'Dados da empresa atualizados com sucesso', 
-        usuario: usuarioAtualizado 
+      const usuarioAtualizado = await repoUsuarios.atualizarDadosEmpresa(usuario_id, { 
+        cnpj, endereco, telefone, 
+        nome_regra, tipo, valor_minimo, pontos, multiplicador 
+      });
+      res.json({
+        message: 'Dados da empresa atualizados com sucesso',
+        usuario: usuarioAtualizado
       });
     } catch (error) {
       console.error('Erro ao atualizar dados da empresa:', error);
-      res.status(500).json({ 
-        errorMessage: 'Erro ao atualizar dados da empresa', 
-        error: error.message 
+      res.status(500).json({
+        errorMessage: 'Erro ao atualizar dados da empresa',
+        error: error.message
       });
     }
   }
 
-  // ==================== RETORNO DO CONTROLLER ====================
-
+  // CORRIGIDO: Return completo das funções (estava faltando no paste)
   return {
-    // Funções originais
     visualizarUsuario,
-    cadastrar, 
+    cadastrar,
     excluir,
     tornarAdmin,
     logar,
     givePoints,
-    
-    // Funções novas (empresa)
     tornarEmpresa,
     aprovarEmpresa,
     listarEmpresas,

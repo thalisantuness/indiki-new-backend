@@ -1,6 +1,6 @@
 const Sequelize = require('sequelize');
 const sequelize = require('../utils/db');
-const { Usuario } = require('./Usuarios'); 
+const { Usuario } = require('./Usuarios');
 
 const Compra = sequelize.define('compras', {
   compra_id: {
@@ -13,9 +13,10 @@ const Compra = sequelize.define('compras', {
     allowNull: false,
     unique: true,
   },
-  cliente_id: {
+  cliente_id: {  // AJUSTADO: Agora permite null para pendentes
     type: Sequelize.INTEGER,
-    allowNull: false,
+    allowNull: true,  // MUDANÇA: De false para true
+    defaultValue: null,  // ADICIONADO: Default null
     references: { model: 'usuarios', key: 'usuario_id' },
   },
   empresa_id: {
@@ -68,19 +69,17 @@ const Compra = sequelize.define('compras', {
 });
 
 // Associações
-Compra.belongsTo(Usuario, { 
-  foreignKey: 'cliente_id', 
-  as: 'cliente' 
+Compra.belongsTo(Usuario, {
+  foreignKey: 'cliente_id',
+  as: 'cliente'
 });
-
-Compra.belongsTo(Usuario, { 
-  foreignKey: 'empresa_id', 
-  as: 'empresa' 
+Compra.belongsTo(Usuario, {
+  foreignKey: 'empresa_id',
+  as: 'empresa'
 });
-
-Compra.belongsTo(Usuario, { 
-  foreignKey: 'validado_por', 
-  as: 'validador' 
+Compra.belongsTo(Usuario, {
+  foreignKey: 'validado_por',
+  as: 'validador'
 });
 
 module.exports = { Compra };

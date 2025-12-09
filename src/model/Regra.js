@@ -1,6 +1,6 @@
 const Sequelize = require('sequelize');
 const sequelize = require('../utils/db');
-const { Usuario } = require('./Usuarios'); 
+// const { Usuario } = require('./Usuarios');
 
 const Regra = sequelize.define('regras', {
   regra_id: {
@@ -12,6 +12,7 @@ const Regra = sequelize.define('regras', {
     type: Sequelize.INTEGER,
     allowNull: false,
     references: { model: 'usuarios', key: 'usuario_id' },
+    unique: true,  // ADICIONADO: Enforce uma única por empresa
   },
   nome: {
     type: Sequelize.STRING,
@@ -52,11 +53,14 @@ const Regra = sequelize.define('regras', {
   schema: 'public',
   tableName: 'regras',
   timestamps: false,
+  indexes: [  // ADICIONADO: Unique index
+    { unique: true, fields: ['empresa_id'] }
+  ]
 });
 
-Regra.belongsTo(Usuario, { 
-  foreignKey: 'empresa_id', 
-  as: 'empresa' 
-});
+// Regra.belongsTo(Usuario, {
+//   foreignKey: 'empresa_id',
+//   as: 'empresa'
+// });
 
 module.exports = { Regra };
