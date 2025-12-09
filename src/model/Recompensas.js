@@ -42,11 +42,11 @@ const Recompensas = sequelize.define('recompensas', {
     type: Sequelize.DATE,
     defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
   },
-  usuario_id: {
-    type: Sequelize.INTEGER,
-    allowNull: false,
-    references: { model: 'usuarios', key: 'usuario_id' },
-  }
+//   usuario_id: {
+//     type: Sequelize.INTEGER,
+//     allowNull: false,
+//     references: { model: 'usuarios', key: 'usuario_id' },
+//   }
 }, {
   schema: 'public',
   tableName: 'recompensas',
