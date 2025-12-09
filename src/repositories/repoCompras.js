@@ -4,9 +4,11 @@ const { Usuario } = require('../model/Usuarios');
 const { Regra } = require('../model/Regra');
 const { Op } = require('sequelize');
 const crypto = require('crypto');
+const { canonicalize, generateSignature } = require('../utils/signature'); // Importe o helper para assinatura
 
-async function listarCompras() {
+async function listarCompras(whereFilters = {}) {
   return Compra.findAll({
+    where: whereFilters,
     include: [
       {
         model: Usuario,
@@ -23,9 +25,11 @@ async function listarCompras() {
   });
 }
 
-async function listarComprasPorEmpresa(empresa_id) {
+async function listarComprasPorEmpresa(empresa_id, status = null) {
+  const where = { empresa_id };
+  if (status) where.status = status;
   return Compra.findAll({
-    where: { empresa_id },
+    where,
     include: [
       {
         model: Usuario,
@@ -149,57 +153,71 @@ async function calcularPontosPorRegras(empresa_id, valor) {
 }
 
 async function claimCompra(qr_code_data, cliente_id) {
-  // Validar dados do QR (assinatura e expiração) - assumindo que vem do service
-  const dados = JSON.parse(qr_code_data);
-  const { qr_code_id, valor, empresa_id, assinatura } = dados;
-  // Verificar assinatura simples (use secret do env)
-  const secret = process.env.QR_CODE_SECRET || 'sua-chave-secreta-qrcode';
-  const payloadStr = JSON.stringify({ qr_code_id, valor, empresa_id, timestamp: dados.timestamp, expiresAt: dados.expiresAt });
-  const assinaturaEsperada = require('crypto').createHmac('sha256', secret).update(payloadStr).digest('hex');
-  if (assinatura !== assinaturaEsperada) {
-    throw new Error('Assinatura do QR code inválida');
-  }
-  if (Date.now() > dados.expiresAt) {
-    throw new Error('QR Code expirado');
-  }
-  // Buscar compra pendente sem cliente
-  const compra = await Compra.findOne({
-    where: {
-      qr_code_id,
-      status: 'pendente',
-      cliente_id: null
-    },
-    include: [{ model: Usuario, as: 'cliente' }]
-  });
-  if (!compra) {
-    throw new Error('Compra não encontrada, já claimada ou inválida');
-  }
-  // Verificar valor
-  if (parseFloat(compra.valor) !== parseFloat(valor)) {
-    throw new Error('Valor da compra não corresponde');
-  }
-  // Claim: Associar cliente e validar
-  compra.cliente_id = cliente_id;
-  compra.status = 'validada';
-  compra.validado_em = new Date();
-  await compra.save();
-  // Adicionar pontos ao cliente
-  const cliente = await Usuario.findByPk(cliente_id);
-  if (!cliente || cliente.role !== 'cliente') {
-    throw new Error('Cliente inválido');
-  }
-  cliente.pontos += compra.pontos_adquiridos;
-  await cliente.save();
-  return {
-    success: true,
-    message: 'Compra claimada com sucesso! Pontos adicionados.',
-    compra: {
-      compra_id: compra.compra_id,
-      valor: compra.valor,
-      pontos_adquiridos: compra.pontos_adquiridos,
-      cliente_novo_saldo: cliente.pontos
+  try {
+    const dados = JSON.parse(qr_code_data);
+    const { qr_code_id, valor, empresa_id, assinatura } = dados;
+
+    // Log para debug
+    console.log('Dados parseados:', { qr_code_id, valor, empresa_id, hasAssinatura: !!assinatura, expiresAt: new Date(dados.expiresAt) });
+    console.log('Assinatura recebida:', assinatura ? assinatura.substring(0, 10) + '...' : 'N/A');
+    
+    // Verificar assinatura com canonicalize
+    const secret = process.env.QR_CODE_SECRET || 'sua-chave-secreta-qrcode';
+    const payload = { ...dados };
+    delete payload.assinatura; // Remove para verificar
+    const assinaturaEsperada = generateSignature(payload, secret);
+    console.log('Assinatura esperada:', assinaturaEsperada.substring(0, 10) + '...');
+
+    if (assinatura !== assinaturaEsperada) {
+      throw new Error('Assinatura do QR code inválida');
     }
-  };
+
+    if (Date.now() > dados.expiresAt) {
+      throw new Error('QR Code expirado');
+    }
+
+    // Buscar compra pendente sem cliente
+    const compra = await Compra.findOne({
+      where: {
+        qr_code_id,
+        status: 'pendente',
+        cliente_id: null
+      },
+      include: [{ model: Usuario, as: 'cliente' }]
+    });
+    if (!compra) {
+      throw new Error('Compra não encontrada, já claimada ou inválida');
+    }
+    // Verificar valor
+    if (parseFloat(compra.valor) !== parseFloat(valor)) {
+      throw new Error('Valor da compra não corresponde');
+    }
+    // Claim: Associar cliente e validar
+    compra.cliente_id = cliente_id;
+    compra.status = 'validada';
+    compra.validado_em = new Date();
+    await compra.save();
+    // Adicionar pontos ao cliente
+    const cliente = await Usuario.findByPk(cliente_id);
+    if (!cliente || cliente.role !== 'cliente') {
+      throw new Error('Cliente inválido');
+    }
+    cliente.pontos += compra.pontos_adquiridos;
+    await cliente.save();
+    return {
+      success: true,
+      message: 'Compra claimada com sucesso! Pontos adicionados.',
+      compra: {
+        compra_id: compra.compra_id,
+        valor: compra.valor,
+        pontos_adquiridos: compra.pontos_adquiridos,
+        cliente_novo_saldo: cliente.pontos
+      }
+    };
+  } catch (error) {
+    console.error('Erro no claimCompra:', error);
+    throw error;
+  }
 }
 
 async function atualizarCompra(id, dadosAtualizados, usuario_id, role) {
@@ -243,7 +261,7 @@ async function estatisticasEmpresa(empresa_id) {
   });
   return {
     total_compras: compras[0].dataValues.total_compras || 0,
-    total_vendido: compras[0].dataValues.total_vendido || 0,  // Corrigido: era 'total_vendado'
+    total_vendido: compras[0].dataValues.total_vendido || 0,
     total_pontos_distribuidos: compras[0].dataValues.total_pontos_distribuidos || 0,
     clientes_unicos: clientesUnicos
   };
