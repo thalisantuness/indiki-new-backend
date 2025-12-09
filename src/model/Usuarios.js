@@ -66,9 +66,9 @@ const Usuario = sequelize.define('Usuario', {
   schema: 'public',
   tableName: 'usuarios',
   timestamps: false,
-  indexes: [
-    { fields: ['regra_id'] }
-  ]
+//   indexes: [
+//     { fields: ['regra_id'] }
+//   ]
 });
 
 
